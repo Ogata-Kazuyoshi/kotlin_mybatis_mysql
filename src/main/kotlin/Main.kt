@@ -5,7 +5,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder
 import org.mybatis.dynamic.sql.SqlBuilder
 
 fun main(args: Array<String>) {
-    list5_4_9()
+    list5_4_22()
 }
 
 fun createSessionFactory():SqlSessionFactory {
@@ -65,5 +65,80 @@ fun list5_4_9 () {
             //全行を返却
         }
         println(count)
+    }
+}
+
+fun list5_4_10 () {
+    val user = UserRecord(103,"Shiro",18,"Hello")
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.insert(user)
+        session.commit()
+        println("${count}行のレコードを挿入しました")
+    }
+}
+
+fun list5_4_12 () {
+    val userList = listOf(UserRecord(104,"Goro",15,"Hello"), UserRecord(105,"Rokuro",13,"Hello"))
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.insertMultiple(userList)
+        session.commit()
+        println("${count}行のレコードを挿入しました")
+    }
+}
+
+fun list5_4_14 () {
+    val user = UserRecord(id = 105, profile = "Bye")
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.updateByPrimaryKeySelective(user)
+        session.commit()
+        println("${count}行のレコードを更新しました。")
+    }
+}
+
+fun list5_4_16 () {
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.update {
+            set(UserDynamicSqlSupport.User.profile).equalTo("Hey")
+            where(UserDynamicSqlSupport.User.id, SqlBuilder.isEqualTo(104))
+        }
+        session.commit()
+        println("${count}行のレコードを更新しました")
+    }
+}
+
+fun list5_4_18 () {
+    val user = UserRecord(profile = "Good Morning")
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.update {
+            updateSelectiveColumns(user)
+            where(UserDynamicSqlSupport.User.name, SqlBuilder.isEqualTo("Shiro"))
+        }
+        session.commit()
+        println("${count}行のレコードを更新しました")
+    }
+}
+
+fun list5_4_20 () {
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.deleteByPrimaryKey(102)
+        session.commit()
+        println("${count} 行のレコードを削除しました")
+    }
+}
+
+fun list5_4_22 () {
+    createSessionFactory().openSession().use { session ->
+        val mapper = session.getMapper(UserMapper::class.java)
+        val count = mapper.delete {
+            where(UserDynamicSqlSupport.User.name, SqlBuilder.isEqualTo("Jiro"))
+        }
+        session.commit()
+        println("${count}行のレコードを削除しました")
     }
 }
